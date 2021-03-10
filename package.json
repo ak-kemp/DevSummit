@@ -1,0 +1,14 @@
+{
+  "name": "",
+  "version": "",
+  "private": true,
+  "description": "A demo",
+  "author": "Anita Kemp",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "http-server": "*"
+  },
+  "scripts": {
+    "start": "http-server ."
+  }
+}
