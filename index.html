@@ -1,9 +1,12 @@
-<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Mapbox GL JS Tutorials: Display a map</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
     <style>
       html,
       body,
@@ -16,31 +19,108 @@
         font-size: 14px;
         color: #323232;
       }
+      
+      .map-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.8);
+        margin-right: 20px;
+        font-family: Arial, sans-serif;
+        overflow: auto;
+        border-radius: 3px;
+      }
+      
+        #legend {
+        padding: 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        line-height: 18px;
+        height: 150px;
+        margin-top: 40px;
+        width: 100px;
+      }
+      .legend-key {
+        display: inline-block;
+        border-radius: 20%;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+      }
     </style>
-
-    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
-
   </head>
 
   <body>
     <div id="map"></div>
-
+    <div class='map-overlay' id='legend'><p><b>Tree health</b></p></div>
     <script>
 
-    //  mapboxgl.accessToken = 'pk.eyJ1IjoiYXI1MDYwOCIsImEiOiJja20wdDRqbngyNDF1MnVuNnI3dzFkdDlzIn0.a94snO6qsvmc8JY0l5xzKw';
-       const apiKey = "AAPK28c0830a6497486084df37ee47ec9a9fHRmBnHrhQ9b3jsmSvB2x5VdnIgtpMn6QQ6kIOI4PJht9dlVX3gK_IUl93IWP9rHQ";
-       const basemapEnum = "ArcGIS:Navigation"
+     mapboxgl.accessToken = "pk.eyJ1IjoiYXI1MDYwOCIsImEiOiJja20wdDRqbngyNDF1MnVuNnI3dzFkdDlzIn0.a94snO6qsvmc8JY0l5xzKw";
+      
       const map = new mapboxgl.Map({
-        container: "map", // the id of the div element
-        style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&apiKey=${apiKey}`,
-   //     style: 'mapbox://styles/mapbox/streets-v11',
-        zoom: 1, // starting zoom
-        center: [-5,30] // starting location [longitude, latitude]
+        container: "map", 
+        style: 'mapbox://styles/mapbox/streets-v11', 
+        zoom: 10,
+        center:  [-122.6750, 45.5051]
       });
+      
 
+      function showTrees (){
+        const trees = "Street_Trees_PDX";
+        const treesURL = "https://services8.arcgis.com/87xMVlxSyDt491tZ/arcgis/rest/services/" + 
+              trees +
+             "/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=pgeojson";
+        map.addSource("pdx", {
+          type: "geojson",
+          data: treesURL
+        });
+        
+          map.addLayer({
+          id: "trees",
+          type: "circle",
+          source: "pdx",
+          paint: {
+            "circle-color": [
+              "match",
+              ["get", "Condition"],
+              "Fair",
+              "#9E559C",
+              "Good",
+              "#A7C636",
+              "Poor",
+              "#149ECE",
+              "Dead",
+              "#ED5151",
+              "black"
+            ],
+          }
+        })
+
+      }
+      
+      
+     map.on("load", ()=>{
+      
+       const conditions= ["Good", "Fair", "Poor", "Dead"];
+       const colors = ["#A7C636","#9E559C", "#149ECE","#ED5151" ]
+      
+      for (i = 0; i < conditions.length; i++) {
+        const layer = conditions[i];
+        const color = colors[i];
+        const item = document.createElement('div');
+        const key = document.createElement('span');
+        key.className = 'legend-key';
+        key.style.backgroundColor = color;
+
+        var value = document.createElement('span');
+        value.innerHTML = layer;
+        item.appendChild(key);
+        item.appendChild(value);
+        legend.appendChild(item);  
+      }
+     showTrees()
+           
+     })
     </script>
 
   </body>
-
 </html>
