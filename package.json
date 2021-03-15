@@ -10,8 +10,5 @@
   },
   "scripts": {
     "start": "http-server ."
-  },
-  "dependencies": {
-    "@watergis/mapbox-gl-legend": "^1.1.3"
   }
 }

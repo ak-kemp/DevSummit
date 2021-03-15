@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
     <style>
       html,
       body,
@@ -51,7 +52,7 @@
 
   <body>
     <div id="map"></div>
-    <div class='map-overlay' id='legend'><p><b>Tree health</b></p></div>
+    <div class='map-overlay' id='legend'><p><b>Tree condition</b></p></div>
     <script>
 
      mapboxgl.accessToken = "pk.eyJ1IjoiYXI1MDYwOCIsImEiOiJja20wdDRqbngyNDF1MnVuNnI3dzFkdDlzIn0.a94snO6qsvmc8JY0l5xzKw";
@@ -59,7 +60,7 @@
       const map = new mapboxgl.Map({
         container: "map", 
         style: 'mapbox://styles/mapbox/streets-v11', 
-        zoom: 10,
+        zoom: 12,
         center:  [-122.6750, 45.5051]
       });
       
@@ -83,11 +84,11 @@
               "match",
               ["get", "Condition"],
               "Fair",
-              "#9E559C",
+              "#38A800",
               "Good",
-              "#A7C636",
+              "#267300",
               "Poor",
-              "#149ECE",
+              "#E6E600",
               "Dead",
               "#ED5151",
               "black"
@@ -99,9 +100,11 @@
       
       
      map.on("load", ()=>{
+
+  // Create a legend
       
        const conditions= ["Good", "Fair", "Poor", "Dead"];
-       const colors = ["#A7C636","#9E559C", "#149ECE","#ED5151" ]
+       const colors = ["#267300","#38A800", "#E6E600","#ED5151" ]
       
       for (i = 0; i < conditions.length; i++) {
         const layer = conditions[i];
