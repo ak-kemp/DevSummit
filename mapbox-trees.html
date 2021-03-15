@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
+    <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
     <style>
       html,
       body,
@@ -79,7 +80,7 @@
 
       },
       "paint": {
-        "circle-color": "#9E559C",
+        "circle-color": "#38A800",
         "circle-radius": {
             "stops": [
                [2, 10],
@@ -103,7 +104,7 @@
 
       },
       "paint": {
-        "circle-color": "#A7C636",
+        "circle-color": "#267300",
         "circle-radius": 4
       }
     },
@@ -121,7 +122,7 @@
 
       },
       "paint": {
-        "circle-color": "#149ECE",
+        "circle-color": "#E6E600",
         "circle-radius": 4
       }
     },
@@ -180,7 +181,7 @@
               map.on('mousemove', 'treepoor', (e)=>{
         map.getCanvas().style.cursor = 'pointer';
         const feature = e.features[0];
-        const relatedFeatures = map.querySourceFeatures('treedead', {
+        const relatedFeatures = map.querySourceFeatures('treepoor', {
           sourceLayer: 'PDX Trees',
           filter: ['in', 'Common', feature.properties.Common]
         });
@@ -188,16 +189,54 @@
        popup.setLngLat(e.lngLat).setHTML(`<b>Common Name: ${feature.properties.Common}</b>`).addTo(map);
       })
         
-        map.on('mouseleave', 'treefair', (e)=>{
+        map.on('mouseleave', 'treepoor', (e)=>{
           map.getCanvas().style.cursor = '';
             popup.remove();
          
         })
         
-        
+        const authentication = new arcgisRest.ApiKey({
+         key: apiKey
+       });
 
+     map.getCanvas().style.cursor = "crosshair";
+    
+   map.on("click", async (e) => {
+        // e.lngLat contains the clicked location
+        const response = await arcgisRest.queryDemographicData({
+          studyAreas: [
+            {
+              geometry: {
+                x: e.lngLat.lng,
+                y: e.lngLat.lat
+              }
+            }
+          ],
+          authentication: authentication
+        });
+        
+        
+        let message;
+        const featureSet = response.results[0].value.FeatureSet;
+        if (featureSet.length > 0 && featureSet[0].features.length > 0) {
+          const attributes = featureSet[0].features[0].attributes;
+          message =
+            `<b>Population data in a one mile radius</b>` +
+            [
+              `<br> Population: ${attributes.TOTPOP.toLocaleString()}`,
+            ].join("<br>");
+
+        } else {
+          message = "Data not available for this location.";
+        }
+        
+        const popup = new mapboxgl.Popup().setHTML(message).setLngLat(e.lngLat).addTo(map);
+
+     });
+    
+        
      const conditions= ["Good", "Fair", "Poor", "Dead"];
-    const colors = ["#A7C636","#9E559C", "#149ECE","#ED5151" ]
+    const colors = ["#267300","#38A800", "#E6E600","#ED5151"]
    
     for (i = 0; i < conditions.length; i++) {
     const layer = conditions[i];
