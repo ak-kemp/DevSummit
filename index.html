@@ -7,7 +7,6 @@
     <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
     <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
     <style>
       html,
       body,
@@ -52,24 +51,23 @@
 
   <body>
     <div id="map"></div>
-    <div class='map-overlay' id='legend'><p><b>Tree condition</b></p></div>
+    <div class='map-overlay' id='legend'><p><b>Tree health</b></p></div>
     <script>
 
-     mapboxgl.accessToken = "pk.eyJ1IjoiYXI1MDYwOCIsImEiOiJja20wdDRqbngyNDF1MnVuNnI3dzFkdDlzIn0.a94snO6qsvmc8JY0l5xzKw";
+     mapboxgl.accessToken = "YOUR_MAPBOX_API_KEY";
       
       const map = new mapboxgl.Map({
         container: "map", 
         style: 'mapbox://styles/mapbox/streets-v11', 
-        zoom: 12,
+        zoom: 10,
         center:  [-122.6750, 45.5051]
       });
       
-
       function showTrees (){
         const trees = "Street_Trees_PDX";
         const treesURL = "https://services8.arcgis.com/87xMVlxSyDt491tZ/arcgis/rest/services/" + 
               trees +
-             "/FeatureServer/0/query?where=1=1&outFields=*&f=pgeojson";
+             "/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=pgeojson";
         map.addSource("pdx", {
           type: "geojson",
           data: treesURL
@@ -84,11 +82,11 @@
               "match",
               ["get", "Condition"],
               "Fair",
-              "#38A800",
+              "#9E559C",
               "Good",
-              "#267300",
+              "#A7C636",
               "Poor",
-              "#E6E600",
+              "#149ECE",
               "Dead",
               "#ED5151",
               "black"
@@ -100,11 +98,9 @@
       
       
      map.on("load", ()=>{
-
-  // Create a legend
       
        const conditions= ["Good", "Fair", "Poor", "Dead"];
-       const colors = ["#267300","#38A800", "#E6E600","#ED5151" ]
+       const colors = ["#A7C636","#9E559C", "#149ECE","#ED5151" ]
       
       for (i = 0; i < conditions.length; i++) {
         const layer = conditions[i];
@@ -120,10 +116,8 @@
         item.appendChild(value);
         legend.appendChild(item);  
       }
-     showTrees()
-           
-     })
+     showTrees()    
+     });
     </script>
-
   </body>
 </html>

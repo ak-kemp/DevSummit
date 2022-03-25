@@ -1,13 +1,16 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
-    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://unpkg.com/@esri/arcgis-rest-request@3.0.0/dist/umd/request.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-auth@3.0.0/dist/umd/auth.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-feature-layer@3.0.0/dist/umd/feature-layer.umd.js"></script>
-    <script src="https://unpkg.com/@esri/arcgis-rest-demographics@3.0.0/dist/umd/demographics.umd.js"></script>
+    <link
+      href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
     <style>
       html,
       body,
@@ -20,7 +23,6 @@
         font-size: 14px;
         color: #323232;
       }
-      
       .map-overlay {
         position: absolute;
         top: 0;
@@ -31,8 +33,8 @@
         overflow: auto;
         border-radius: 3px;
       }
-      
-        #legend {
+
+      #legend {
         padding: 10px;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         line-height: 18px;
@@ -49,224 +51,144 @@
       }
     </style>
   </head>
-
   <body>
     <div id="map"></div>
-    <div class='map-overlay' id='legend'><p><b>Tree condition</b></p></div>
+    <div class="map-overlay" id="legend">
+      <p><b>Tree health</b></p>
+    </div>
     <script>
 
-     const apiKey = 'AAPK2a1977cfc1a44f6ca6a44369714e03dcltUEQxZ9zaxhJDjmMjhdqtJp5mW3V9h8ZpKV6G7qyTWv9ANGQEKcJomtCPknR8hE';
-      const basemapEnum = "c26fe994fd1a4fb3978f6c07e5590aef"
-      
+      // Display an ArcGIS basemap layer
+      const apiKey =
+        "YOUR_API_KEY";
+
+      const basemapEnum = "6976148c11bd497d8624206f9ee03e30"; //Custom vector tile style
+
       const map = new mapboxgl.Map({
-        container: "map", 
-          style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&apiKey=${apiKey}`,
-        zoom: 15,
-        center:  [-122.6750, 45.5051]
+        container: "map",
+        style: `https://basemaps-api.arcgis.com/arcgis/rest/services/styles/${basemapEnum}?type=style&apiKey=${apiKey}`,
+        zoom: 12,
+        center: [-122.675, 45.5051],
       });
-      
-// Layer style
-  const layers = [
-         {
-"id": "treefair",
-      "type": "circle",
-      "source": "pdx",
-      "source-layer": "PDX Trees",
-      "filter": [
-        "==",
-        "_symbol",
-        0
-      ],
-      "minzoom": 9,
-      "layout": {
-      },
-    "paint": {
-        "circle-color": "#38A800",
-        "circle-radius": {
-            "stops": [
-               [2, 10],
-               [5, 8],
-              [10, 4]
-            ]
-        }
-      }
-    },
-    {
-      "id": "treegood",
-      "type": "circle",
-      "source": "pdx",
-      "source-layer": "PDX Trees",
-      "filter": [
-        "==",
-        "_symbol",
-        1
-      ],
-      "minzoom": 9,
-      "layout": {
 
-      },
-      "paint": {
-        "circle-color": "#267300",
-        "circle-radius": 4
-      }
-    },
-    {
-      "id": "treepoor",
-      "type": "circle",
-      "source": "pdx",
-      "source-layer": "PDX Trees",
-      "filter": [
-        "==",
-        "_symbol",
-        2
-      ],
-      "minzoom": 9,
-      "layout": {
-      },
-      "paint": {
-        "circle-color": "#E6E600",
-        "circle-radius": 4
-      }
-    },
-    {
-      "id": "treedead",
-      "type": "circle",
-      "source": "pdx",
-      "source-layer": "PDX Trees",
-      "filter": [
-        "==",
-        "_symbol",
-        3
-      ],
-      "minzoom": 9,
-      "layout": {
-      },
-      "paint": {
-        "circle-color": "#ED5151",
-        "circle-radius": 4,
-      }
-    }
-    ]
-      
-      
-     map.on("load", ()=>{
-       
-// Vector tile
-       map.addSource("pdx",{
-         type: "vector",
-         tiles: ["https://vectortileservices8.arcgis.com/87xMVlxSyDt491tZ/arcgis/rest/services/treevtl_demo/VectorTileServer/tile/{z}/{y}/{x}.pbf"]
-       });
-       
-       layers.forEach((layer)=>{
-         map.addLayer(layer)
-       });
-
-// Handler to display tree condition: fair and poor
-
-       const popup = new mapboxgl.Popup({
-        closeButton: false
-      });
-        
-      map.on('mousemove', 'treefair', (e)=>{
-        map.getCanvas().style.cursor = 'pointer';
-        const feature = e.features[0];
-        const relatedFeatures = map.querySourceFeatures('treefair', {
-          sourceLayer: 'PDX Trees',
-          filter: ['in', 'Common', feature.properties.Common]
-        });
-        
-       popup.setLngLat(e.lngLat).setHTML(`<b>Common Name: ${feature.properties.Common}</b><br><b>${feature.properties.Wires}</b>`).addTo(map);
-      });
-        
-        map.on('mouseleave', 'treefair', (e)=>{
-          map.getCanvas().style.cursor = '';
-            popup.remove();
-         
-        });
-        
-     map.on('mousemove', 'treepoor', (e)=>{
-        map.getCanvas().style.cursor = 'pointer';
-        const feature = e.features[0];
-        const relatedFeatures = map.querySourceFeatures('treepoor', {
-          sourceLayer: 'PDX Trees',
-          filter: ['in', 'Common', feature.properties.Common]
-        });
-        
-       popup.setLngLat(e.lngLat).setHTML(`<b>Common Name: ${feature.properties.Common}</b><br><b>${feature.properties.Wires}</b>`).addTo(map);
-      });
-        
-        map.on('mouseleave', 'treepoor', (e)=>{
-          map.getCanvas().style.cursor = '';
-            popup.remove();
-         
-        });
-  
-  // Demographic data 
-       
-  const authentication = new arcgisRest.ApiKey({
-         key: apiKey
-       });
-
-     map.getCanvas().style.cursor = "crosshair";
-    
-   map.on("click", async (e) => {
-        const response = await arcgisRest.queryDemographicData({
-          studyAreas: [
-            {
-              geometry: {
-                x: e.lngLat.lng,
-                y: e.lngLat.lat
-              }
-            }
-          ],
-          studyAreasOptions: {
-            bufferUnits: "Minutes",
-            bufferRadii: [1],
-            travel_mode: "Walking"
+      const layers = [
+        {
+          id: "treefair",
+          type: "circle",
+          source: "pdx",
+          "source-layer": "PDX Trees",
+          filter: ["==", "_symbol", 0],
+          minzoom: 9,
+          layout: {},
+          paint: {
+            "circle-color": "#38A800",
+            "circle-radius": {
+              stops: [
+                [2, 10],
+                [5, 8],
+                [10, 3],
+              ],
+            },
           },
-         authentication: authentication
+        },
+        {
+          id: "treegood",
+          type: "circle",
+          source: "pdx",
+          "source-layer": "PDX Trees",
+          filter: ["==", "_symbol", 1],
+          minzoom: 9,
+          layout: {},
+          paint: {
+            "circle-color": "#267300",
+            "circle-radius": 3,
+          },
+        },
+        {
+          id: "treepoor",
+          type: "circle",
+          source: "pdx",
+          "source-layer": "PDX Trees",
+          filter: ["==", "_symbol", 2],
+          minzoom: 9,
+          layout: {},
+          paint: {
+            "circle-color": "#E6E600",
+            "circle-radius": 3,
+          },
+        },
+        {
+          id: "treedead",
+          type: "circle",
+          source: "pdx",
+          "source-layer": "PDX Trees",
+          filter: ["==", "_symbol", 3],
+          minzoom: 9,
+          layout: {},
+          paint: {
+            "circle-color": "#ED5151",
+            "circle-radius": 3,
+          },
+        },
+      ];
+
+      map.on("load", () => {
+        // Add a vector tile layer, published from your feature layer
+        map.addSource("pdx", {
+          type: "vector",
+          tiles: [
+            "https://vectortileservices8.arcgis.com/87xMVlxSyDt491tZ/arcgis/rest/services/treevtl_demo/VectorTileServer/tile/{z}/{y}/{x}.pbf",
+          ],
         });
-        
-        
-        let message;
-        const featureSet = response.results[0].value.FeatureSet;
-        if (featureSet.length > 0 && featureSet[0].features.length > 0) {
-          const attributes = featureSet[0].features[0].attributes;
-          message =
-            `<b>Population within a minute walk</b>` +
-            [
-              `<br> Population: ${attributes.TOTPOP.toLocaleString()}`,
-            ].join("<br>");
 
-        } else {
-          message = "Data not available for this location.";
+        layers.forEach((layer) => {
+          map.addLayer(layer);
+        });
+
+        const popup = new mapboxgl.Popup({
+          closeButton: false,
+        });
+
+        //Show name of trees in poor condition 
+
+        map.on("mousemove", "treepoor", (e) => {
+          map.getCanvas().style.cursor = "pointer";
+          const feature = e.features[0];
+          const relatedFeatures = map.querySourceFeatures("treepoor", {
+            sourceLayer: "PDX Trees",
+            filter: ["in", "Common", feature.properties.Common],
+          });
+
+          popup
+            .setLngLat(e.lngLat)
+            .setHTML(`<b>Common Name: ${feature.properties.Common}</b>`)
+            .addTo(map);
+        });
+
+        map.on("mouseleave", "treepoor", (e) => {
+          map.getCanvas().style.cursor = "";
+          popup.remove();
+        });
+
+        //Add legend
+        const conditions = ["Good", "Fair", "Poor", "Dead"];
+        const colors = ["#267300", "#38A800", "#E6E600", "#ED5151"];
+
+        for (i = 0; i < conditions.length; i++) {
+          const layer = conditions[i];
+          const color = colors[i];
+          const item = document.createElement("div");
+          const key = document.createElement("span");
+          key.className = "legend-key";
+          key.style.backgroundColor = color;
+
+          const value = document.createElement("span");
+          value.innerHTML = layer;
+          item.appendChild(key);
+          item.appendChild(value);
+          legend.appendChild(item);
         }
-        
-        const popup = new mapboxgl.Popup().setHTML(message).setLngLat(e.lngLat).addTo(map);
-
-     });
-         
-// Legend
-       const conditions= ["Good", "Fair", "Poor", "Dead"];
-       const colors = ["#267300","#38A800", "#E6E600","#ED5151" ]
-      
-      for (i = 0; i < conditions.length; i++) {
-        const layer = conditions[i];
-        const color = colors[i];
-        const item = document.createElement('div');
-        const key = document.createElement('span');
-        key.className = 'legend-key';
-        key.style.backgroundColor = color;
-
-        var value = document.createElement('span');
-        value.innerHTML = layer;
-        item.appendChild(key);
-        item.appendChild(value);
-        legend.appendChild(item);  
-      };
-           
-     });
+      });
     </script>
-
   </body>
 </html>

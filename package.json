@@ -2,7 +2,7 @@
   "name": "DevSummit Demo",
   "version": "",
   "private": true,
-  "description": "A demo",
+  "description": "Integrate ArcGIS location services with Mapbox GL JS v.1",
   "author": "Anita Kemp",
   "license": "Apache-2.0",
   "devDependencies": {
@@ -10,5 +10,8 @@
   },
   "scripts": {
     "start": "http-server ."
+  },
+  "dependencies": {
+    "request": "^2.88.2"
   }
 }
